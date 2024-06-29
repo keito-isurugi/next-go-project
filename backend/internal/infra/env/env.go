@@ -8,10 +8,11 @@ import (
 )
 
 type Values struct {
-	Env string `default:"local split_words:"true"`
+	Env string `default:"local" split_words:"true"`
 	Server
 	DB
 	TestDB
+	Debug bool `default:"true" split_words:"true"`
 }
 
 type Server struct {

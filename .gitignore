@@ -1,0 +1,12 @@
+.vscode/*
+.history/
+# Built Visual Studio Code Extensions
+*.vsix
+# Misc
+.DS_Store
+.fleet
+.idea/*
+
+.env
+!frontend/.env
+.persist/pgadmin/

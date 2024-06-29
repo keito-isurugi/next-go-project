@@ -1,0 +1,14 @@
+version: '3'
+
+includes:
+  backend:
+    dir: ./backend
+    taskfile: ./backend/Taskfile.yml
+    aliases:
+      - be
+
+tasks:
+  default:
+    desc: Show commands
+    cmds:
+      - task -a --sort none
