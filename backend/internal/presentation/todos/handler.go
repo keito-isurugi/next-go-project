@@ -47,6 +47,14 @@ type TodoHandler interface {
 	DeleteTodo(c echo.Context) error
 }
 
+type todoResponse struct {
+	ID       int    `json:"id" example:"1"`
+	Title    string `json:"title" example:"テストタイトル"`
+	DoneFlag bool   `json:"doneFlag" example:"false"`
+}
+
+type listTodosResponse []todoResponse
+
 type todoHnadler struct {
 	dbClient db.Client
 }
@@ -59,10 +67,20 @@ func NewTodoHandler(dc db.Client) TodoHandler {
 
 func (th *todoHnadler) ListTodos(c echo.Context) error {
 	var lt ListTodos
-	if err := th.dbClient.Conn(c.Request().Context()).Order("id").Find(&lt).Error; err != nil {
+	if err := th.dbClient.Conn(c.Request().Context()).Where("done_flag", false).Order("id").Find(&lt).Error; err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, lt)
+
+	res := make(listTodosResponse, len(lt))
+	for i := range lt {
+		res[i] = todoResponse{
+			ID: lt[i].ID,
+			Title:lt[i].Title,
+			DoneFlag: lt[i].DoneFlag,
+		}
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func (th *todoHnadler) GetTodo(c echo.Context) error {
@@ -72,7 +90,14 @@ func (th *todoHnadler) GetTodo(c echo.Context) error {
 	if err := th.dbClient.Conn(c.Request().Context()).Where("id", id).Find(&t).Error; err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, t)
+
+	res := todoResponse{
+		ID: t.ID,
+		Title: t.Title,
+		DoneFlag: t.DoneFlag,
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 type registerTodoRequest struct {
@@ -102,6 +127,7 @@ func (th *todoHnadler) RegisterTodo(c echo.Context) error {
 
 type updateTodoRequest struct {
 	Title string `json:"title" example:"サンプルタイトル" ja:"タイトル" validate:"required,max=255"`
+	DoneFlag bool `json:"doneFlag" example:"true" ja:"完了フラグ" validate:"required"`
 }
 
 func (th *todoHnadler) UpdateTodo(c echo.Context) error {
@@ -121,7 +147,7 @@ func (th *todoHnadler) UpdateTodo(c echo.Context) error {
 		todo.ID,
 		todo.UserID,
 		req.Title,
-		todo.DoneFlag,
+		req.DoneFlag,
 		todo.CreatedAt,
 		time.Now(),
 	)
