@@ -29,8 +29,8 @@ jobs:
           version: "3.x"
 
       # APIクライアントの型はBEのswaggerから生成しているため、型定義ファイルを生成しておかないとlinterが落ちる
-      - name: Generate API client types
-        run: task fe:swag
+      # - name: Generate API client types
+      #   run: task fe:swag
 
       - name: Frontend check task
         run: task fe:check
