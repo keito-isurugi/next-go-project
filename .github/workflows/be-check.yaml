@@ -88,7 +88,8 @@ jobs:
       - uses: golangci/golangci-lint-action@v6
         with:
           version: v1.59 # asdfのバージョンと合わせる
-          args: --config=backend/.golangci.yaml
+          working-directory: backend
+          args: --timeout=5m
 
       - name: Test
         env:
