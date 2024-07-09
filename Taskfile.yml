@@ -1,6 +1,12 @@
 version: '3'
 
 includes:
+  frontend:
+    dir: ./frontend
+    taskfile: ./frontend/Taskfile.yml
+    aliases:
+      - fe
+      
   backend:
     dir: ./backend
     taskfile: ./backend/Taskfile.yml
