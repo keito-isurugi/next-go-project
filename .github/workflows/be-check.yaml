@@ -71,10 +71,29 @@ jobs:
         with:
           version: "3.x"
 
-      - uses: golangci/golangci-lint-action@v6
-        with:
-          version: v1.59 # asdfのバージョンと合わせる
-          args: --config=backend/.golangci.yaml
+      # デバッグ    
+      - name: Print working directory
+        run: pwd
+
+      - name: List files in root
+        run: ls -la
+
+      - name: List files in backend directory
+        run: ls -la backend
+
+      - name: Install dependencies
+        run: go mod download
+        working-directory: backend
+
+      - name: Run golangci-lint
+        run: |
+          golangci-lint run --config=backend/.golangci.yaml
+        working-directory: backend
+        
+      # - uses: golangci/golangci-lint-action@v6
+      #   with:
+      #     version: v1.59 # asdfのバージョンと合わせる
+      #     args: --config=backend/.golangci.yaml
 
       - name: Test
         env:
