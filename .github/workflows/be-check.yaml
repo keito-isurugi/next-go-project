@@ -75,7 +75,6 @@ jobs:
         with:
           version: v1.59 # asdfのバージョンと合わせる
           args: --config=backend/.golangci.yaml
-          working-directory: backend
 
       - name: Test
         env:
