@@ -1,0 +1,113 @@
+name: 【BE】Run lint & unit tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "backend/**" # backendディレクトリ以下の変更があった場合のみ実行
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        go-version: [ 1.22 ]
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: bap_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4
+
+      - name: Run migrations with Docker
+        working-directory: backend
+        run: |
+          docker run -v $(pwd)/DDL:/migrations --network host migrate/migrate -path=/migrations/ -database "postgresql://test:test@127.0.0.1:5432/bap_test?sslmode=disable" -verbose up
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Start LocalStack
+        working-directory: .
+        run: docker compose up -d --build localstack-test
+        env:
+          SERVER_PORT: 8080
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DATABASE: bap
+          TEST_POSTGRES_HOST: localhost
+          TEST_POSTGRES_PORT: 5432
+          TEST_POSTGRES_USER: test
+          TEST_POSTGRES_PASSWORD: test
+          TEST_POSTGRES_DATABASE: bap_test
+
+      - uses: arduino/setup-task@v2
+        with:
+          version: "3.x"
+
+      - uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.59 # asdfのバージョンと合わせる
+          args: --config=backend/.golangci.yaml
+
+      - name: Test
+        env:
+          SERVER_PORT: 8080
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DATABASE: bap
+          TEST_POSTGRES_HOST: localhost
+          TEST_POSTGRES_PORT: 5432
+          TEST_POSTGRES_USER: test
+          TEST_POSTGRES_PASSWORD: test
+          TEST_POSTGRES_DATABASE: bap_test
+          AWS_REGION: ap-northeast-1
+          AWS_ACCESS_KEY_ID: dummy
+          AWS_SECRET_ACCESS_KEY: dummy
+          AWS_ENDPOINT: http://localhost:4566
+          AWS_ENDPOINT_LOCAL: http://localhost:4566
+          AWS_S3_BUCKET_NAME: bank-banner-images
+          BA_HOST_NAME: localhost
+          BAP_HOST_NAME: portal.ktba1.test.kkdv.tech
+          BA_CLIENT_NAME: ba-portal
+          BA_CLIENT_SECRET: theeNgaezei2cuu3luteil4ohahgheeke0aethaich2aingaichai1Eid5Shu5oe
+          BA_IDP_CERTS_ENDPOINT: https://bamanager-idp.local.kkdv.tech/oidc/certs
+        run: task be:coverage-ci
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./backend/coverage.txt
+          directory: ./
+          flags: unittests
+          fail_ci_if_error: true

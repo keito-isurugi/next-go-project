@@ -1,0 +1,36 @@
+name: 【FE】Run lint & style check
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "frontend/**" # frontendディレクトリ以下の変更があった場合のみ実行
+      - "backend/swagger/src/swagger.yaml" # swagger.yamlからAPIクライアントの型を生成しているため、FEとBEでパラメータの不一致が起きないか確認する
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+      - "backend/swagger/src/swagger.yaml"
+
+jobs:
+  check:
+    name: frontend check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: arduino/setup-task@v2
+        with:
+          version: "3.x"
+
+      # APIクライアントの型はBEのswaggerから生成しているため、型定義ファイルを生成しておかないとlinterが落ちる
+      - name: Generate API client types
+        run: task fe:swag
+
+      - name: Frontend check task
+        run: task fe:check
