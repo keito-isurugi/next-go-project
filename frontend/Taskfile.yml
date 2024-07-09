@@ -1,0 +1,29 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install npm dependencies
+    cmds:
+      - pnpm install
+
+  # TODO go側のswaggoのバージョンが1系でopenapi対応していないので、swagger v2の対応をしていないopenapi-typescript6系を避けて5系を使用
+  # TODO swaggoの2系は2024年5月現在はRC版なので、正式にリリースしたらopenapiに差し替える。
+  swag:
+    desc: Generate swagger
+    cmds:
+      - npx openapi-typescript@5.4.2 ../backend/swagger/src/swagger.yaml --output ./schemas/api.gen.d.ts
+
+  shell:
+    desc: Execute application shell
+    cmds:
+      - docker-compose exec app /bin/ash
+
+  check:
+    desc: Run npm lint & style check
+    cmds:
+      - pnpm run lint
+
+  fix:
+    desc: Run npm lint fix & style fix
+    cmds:
+      - pnpm run format
