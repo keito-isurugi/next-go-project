@@ -1,11 +1,11 @@
 pre-commit:
   parallel: true
   commands:
-    # swag:
-    #   root: backend/
-    #   tags: backend generate swagger file
-    #   glob: "*.go"
-    #   run: task swag && git add {staged_files}
+    swag:
+      root: backend/
+      tags: backend generate swagger file
+      glob: "*.go"
+      run: task swag && git add {staged_files}
     # golangci:
     #   root: backend/
     #   tags: backend lint
