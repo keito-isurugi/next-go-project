@@ -23,21 +23,21 @@ linters:
     - unused
     - whitespace
 
-issues:
-  exclude-dirs:
-    - internal/domain/repository/mock
-    - internal/domain/repository/bigadvance/mock
-    - swagger
-  exclude-rules:
-    # NOTE: testファイルでの定数定義のエラーは適応させない
-    - path: _test\.go
-      linters:
-        - goconst
-    # TODO 循環的複雑度が(> 15)なので要リファクタ
-    - path: internal\/usecase\/appointment\/get_availabilities_usecase\.go
-      linters:
-        - gocyclo
-    # TODO 循環的複雑度が(> 30)なので要リファクタ
-    - path: internal\/server\/middleware\/logger\.go
-      linters:
-        - gocyclo
+# issues:
+#   exclude-dirs:
+#     - internal/domain/repository/mock
+#     - internal/domain/repository/bigadvance/mock
+#     - swagger
+#   exclude-rules:
+#     # NOTE: testファイルでの定数定義のエラーは適応させない
+#     - path: _test\.go
+#       linters:
+#         - goconst
+#     # TODO 循環的複雑度が(> 15)なので要リファクタ
+#     # - path: internal\/usecase\/appointment\/get_availabilities_usecase\.go
+#     #   linters:
+#     #     - gocyclo
+#     # TODO 循環的複雑度が(> 30)なので要リファクタ
+#     - path: internal\/server\/middleware\/logger\.go
+#       linters:
+#         - gocyclo
