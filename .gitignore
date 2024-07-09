@@ -9,4 +9,4 @@
 
 .env
 !frontend/.env
-.persist/pgadmin/
+persist/
