@@ -27,7 +27,7 @@ jobs:
       - uses: arduino/setup-task@v2
         with:
           version: "3.x"
-          
+
       - name: Install dependencies
         run: task fe:install
 
@@ -37,3 +37,6 @@ jobs:
 
       - name: Frontend check task
         run: task fe:check
+
+      - name: Frontend unit tests
+        run: task fe:test

@@ -27,3 +27,9 @@ tasks:
     desc: Run npm lint fix & style fix
     cmds:
       - pnpm run format
+
+  test:
+    desc: Run npm test
+    cmds:
+      - pnpm run test
+  
