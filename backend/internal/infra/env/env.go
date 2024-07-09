@@ -21,21 +21,20 @@ type Server struct {
 }
 
 type DB struct {
-	PostgresHost string `required:"true" split_words:"true"`
-	PostgresPort string `required:"true" split_words:"true"`
-	PostgresUser string `required:"true" split_words:"true"`
+	PostgresHost     string `required:"true" split_words:"true"`
+	PostgresPort     string `required:"true" split_words:"true"`
+	PostgresUser     string `required:"true" split_words:"true"`
 	PostgresPassword string `required:"true" split_words:"true"`
 	PostgresDatabase string `required:"true" split_words:"true"`
 }
 
 type TestDB struct {
-	TestPostgresHost string `required:"true" split_words:"true"`
-	TestPostgresPort string `required:"true" split_words:"true"`
-	TestPostgresUser string `required:"true" split_words:"true"`
+	TestPostgresHost     string `required:"true" split_words:"true"`
+	TestPostgresPort     string `required:"true" split_words:"true"`
+	TestPostgresUser     string `required:"true" split_words:"true"`
 	TestPostgresPassword string `required:"true" split_words:"true"`
 	TestPostgresDatabase string `required:"true" split_words:"true"`
 }
-
 
 func NewValue() (*Values, error) {
 	var v Values

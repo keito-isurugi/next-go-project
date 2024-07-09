@@ -83,25 +83,25 @@ services:
       - SPEC_URL=swagger.yaml
     networks:
       - next-go-project-network
-  # localstack:
-  #   container_name: next-go-project-localstack
-  #   build:
-  #     context: ./backend
-  #     dockerfile: docker/localstack/Dockerfile
-  #   environment:
-  #     - SERVICES=s3
-  #     - DEBUG=1
-  #     - DOCKER_SOCK=/var/run/docker.sock
-  #     - DATA_DIR=/tmp/localstack/data
-  #     - DEFAULT_REGION=ap-northeast-1
-  #   volumes:
-  #     - ./backend/docker/localstack:/docker-entrypoint-initaws.d:ro
-  #     - ./backend/persist/localstack/data:/var/lib/localstack/
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   ports:
-  #     - 4566:4566
-  #   networks:
-  #     - next-go-project-network
+  localstack:
+    container_name: next-go-project-localstack
+    build:
+      context: ./backend
+      dockerfile: docker/localstack/Dockerfile
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - DOCKER_SOCK=/var/run/docker.sock
+      - DATA_DIR=/tmp/localstack/data
+      - DEFAULT_REGION=ap-northeast-1
+    volumes:
+      - ./backend/docker/localstack:/docker-entrypoint-initaws.d:ro
+      - ./backend/persist/localstack/data:/var/lib/localstack/
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 4566:4566
+    networks:
+      - next-go-project-network
   # FE
   next:
     container_name: next-go-project-frontend

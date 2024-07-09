@@ -1,6 +1,21 @@
 version: '3'
 
 tasks:
+  shell:
+    desc: Execute api shell
+    cmds:
+      - docker-compose exec api sh
+
+  tidy:
+    desc: tidy go mod
+    cmds:
+      - docker-compose exec api go mod tidy -v
+
+  mod-download:
+    desc: Download go mod
+    cmds:
+      - go mod download
+
   exec-schema:
     desc: Create schema for test DB
     cmds:
@@ -13,3 +28,79 @@ tasks:
     desc: Insert dummy data for test DB
     cmds:
       - docker cp DDL/insert_dummy_data.sql db:/ && docker exec -it db psql -U postgres -d next_go -f /insert_dummy_data.sqlPP
+
+  refresh-schema:
+    desc: Refresh schema for test DB
+    deps:
+     - exec-schema
+     - exec-dummy
+
+  migrate:
+    desc: Run migration
+    cmds:
+      - docker compose exec migration migrate.sh up .
+
+  coverage:
+    desc: Show coverage
+    cmds:
+      - docker compose exec api go test -coverpkg=./... -coverprofile=coverage.txt ./...
+      - docker compose exec api go tool cover -html=coverage.txt -o coverage.html
+
+  coverage-ci:
+    desc: Show coverage
+    cmds:
+      - go test -coverpkg=./... -coverprofile=coverage.txt ./...
+
+  test:
+    desc: Run test
+    cmds:
+      - docker compose exec api go test ./...
+
+  fmt:
+    desc: Format go files
+    cmds:
+      - find . \( -type d -path './internal/domain/repository/mock' \) -prune -o -name '*.go' -print | xargs goimports -l -w -local "github.com/keito-isurugi/next-go-project"
+      - find . \( -type d -path './internal/domain/repository/mock' \) -prune -o -name '*.go' -print | xargs gofmt -l -w
+
+  mockgen:
+    desc: Generate mock
+    cmds:
+      - go generate ./...
+
+  download-tools:
+    desc: Download go tools
+    cmds:
+      - go install github.com/golang/mock/mockgen@latest
+      - go install golang.org/x/tools/cmd/goimports@latest
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59
+      - go install github.com/swaggo/swag/cmd/swag@latest
+      - go install mvdan.cc/gofumpt@latest
+      - go install github.com/k1LoW/tbls@latest
+
+  lint:
+    desc: Run go lint
+    cmds:
+      - golangci-lint run ./... -v
+
+  fix:
+    desc: Run go lint fix
+    cmds:
+      - golangci-lint run --fix ./... -v
+
+  swag:
+    desc: Generate swagger
+    cmds:
+      - swag init -g ./cmd/api/main.go -o ./swagger/src/
+
+  generate-schema:
+    desc: Generate ER diagram
+    cmds:
+      - docker run --rm --network=next-go-project_next-go-project-network -v $(PWD):/work -w /work ghcr.io/k1low/tbls doc --force
+
+  # shimを再作成してgo installしたパッケージを使用可能なようにする(asdf使わない人もいるかもなのでエラーは無視)
+  reshim:
+    ignore_error: true
+    desc: Reshim asdf golang
+    cmds:
+      - asdf reshim golang
+    

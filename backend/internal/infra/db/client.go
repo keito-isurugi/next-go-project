@@ -42,13 +42,13 @@ func NewClient(e *env.DB, zapLogger *zap.Logger) (Client, error) {
 	fmt.Println(db)
 	db.Logger = db.Logger.LogMode(gormLogger.LogLevel)
 
-	return  &client{
+	return &client{
 		db: db,
 	}, nil
 }
 
 func (c *client) Conn(ctx context.Context) *gorm.DB {
-	return c.db.WithContext(ctx)	
+	return c.db.WithContext(ctx)
 }
 
 func (c *client) Close() error {

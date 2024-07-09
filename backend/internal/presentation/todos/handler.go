@@ -5,18 +5,19 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/keito-isurugi/next-go-project/internal/infra/db"
 	"github.com/labstack/echo/v4"
+
+	"github.com/keito-isurugi/next-go-project/internal/infra/db"
 )
 
 type Todo struct {
-    ID        int     
-    UserID    int       
-    Title     string    
-    DoneFlag  bool      
-    CreatedAt time.Time 
-    UpdatedAt time.Time 
-    DeletedAt *time.Time 
+	ID        int
+	UserID    int
+	Title     string
+	DoneFlag  bool
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 }
 
 type ListTodos []Todo
@@ -30,10 +31,10 @@ func NewTodo(
 	updatedAt time.Time,
 ) *Todo {
 	return &Todo{
-		ID: id,
-		UserID: userID,
-		Title: title,
-		DoneFlag: doneFlag,
+		ID:        id,
+		UserID:    userID,
+		Title:     title,
+		DoneFlag:  doneFlag,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
 	}
@@ -74,8 +75,8 @@ func (th *todoHnadler) ListTodos(c echo.Context) error {
 	res := make(listTodosResponse, len(lt))
 	for i := range lt {
 		res[i] = todoResponse{
-			ID: lt[i].ID,
-			Title:lt[i].Title,
+			ID:       lt[i].ID,
+			Title:    lt[i].Title,
 			DoneFlag: lt[i].DoneFlag,
 		}
 	}
@@ -92,8 +93,8 @@ func (th *todoHnadler) GetTodo(c echo.Context) error {
 	}
 
 	res := todoResponse{
-		ID: t.ID,
-		Title: t.Title,
+		ID:       t.ID,
+		Title:    t.Title,
 		DoneFlag: t.DoneFlag,
 	}
 
@@ -126,8 +127,8 @@ func (th *todoHnadler) RegisterTodo(c echo.Context) error {
 }
 
 type updateTodoRequest struct {
-	Title string `json:"title" example:"サンプルタイトル" ja:"タイトル" validate:"required,max=255"`
-	DoneFlag bool `json:"doneFlag" example:"true" ja:"完了フラグ" validate:"required"`
+	Title    string `json:"title" example:"サンプルタイトル" ja:"タイトル" validate:"required,max=255"`
+	DoneFlag bool   `json:"doneFlag" example:"true" ja:"完了フラグ" validate:"required"`
 }
 
 func (th *todoHnadler) UpdateTodo(c echo.Context) error {

@@ -1,10 +1,10 @@
 package postgres
 
 import (
-	"github.com/keito-isurugi/next-go-project/internal/domain/entity"
-	"github.com/keito-isurugi/next-go-project/internal/infra/db"
 	"github.com/labstack/echo/v4"
 
+	"github.com/keito-isurugi/next-go-project/internal/domain/entity"
+	"github.com/keito-isurugi/next-go-project/internal/infra/db"
 )
 
 type TodoPostgres interface {
@@ -15,7 +15,7 @@ type todoPostgres struct {
 	dbClient db.Client
 }
 
-func NewTodoPostgres(dbClient db.Client) *todoPostgres{
+func NewTodoPostgres(dbClient db.Client) *todoPostgres {
 	return &todoPostgres{
 		dbClient: dbClient,
 	}

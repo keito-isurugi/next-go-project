@@ -1,10 +1,8 @@
 package db
 
 import (
-	"time"
-	"runtime"
-	"strings"
 	"context"
+	"time"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm/logger"
@@ -16,8 +14,8 @@ const (
 
 type GormLogger struct {
 	*zap.Logger
-	LogLevel logger.LogLevel
-	SlowThreshold time.Duration
+	LogLevel         logger.LogLevel
+	SlowThreshold    time.Duration
 	SkipCallerLookup bool
 }
 
@@ -30,19 +28,19 @@ func initGormLogger(zapLogger *zap.Logger) *GormLogger {
 	}
 }
 
-
-func (l *GormLogger) logger() *zap.Logger {
-	for i := 2; i < 15; i++ {
-		_, file, _, ok := runtime.Caller(i)
-		switch {
-		case !ok:
-		case strings.HasSuffix(file, "_test.go"):
-		default:
-			return l.Logger.WithOptions(zap.AddCallerSkip(i))
-		}
-	}
-	return l.Logger
-}
+// 未使用なので一旦コメントアウト
+// func (l *GormLogger) logger() *zap.Logger {
+// 	for i := 2; i < 15; i++ {
+// 		_, file, _, ok := runtime.Caller(i)
+// 		switch {
+// 		case !ok:
+// 		case strings.HasSuffix(file, "_test.go"):
+// 		default:
+// 			return l.Logger.WithOptions(zap.AddCallerSkip(i))
+// 		}
+// 	}
+// 	return l.Logger
+// }
 
 func (l *GormLogger) LogMode(level logger.LogLevel) logger.Interface {
 	return l
@@ -128,4 +126,3 @@ func getAmznTraceID(ctx context.Context) string {
 	}
 	return amznTraceID
 }
-

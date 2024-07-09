@@ -1,26 +1,26 @@
 pre-commit:
   parallel: true
   commands:
-    swag:
+    # swag:
+    #   root: backend/
+    #   tags: backend generate swagger file
+    #   glob: "*.go"
+    #   run: task swag && git add {staged_files}
+    golangci:
       root: backend/
-      tags: backend generate swagger file
+      tags: backend lint
       glob: "*.go"
-      run: task swag && git add {staged_files}
-    # golangci:
-    #   root: backend/
-    #   tags: backend lint
-    #   glob: "*.go"
-    #   run: task fix && git add {staged_files}
-    # gofmt:
-    #   root: backend/
-    #   tags: backend style
-    #   glob: "*.go"
-    #   run: task fmt && git add {staged_files}
-    # schema:
-    #   root: backend/
-    #   tags: generate ER
-    #   glob: "*.sql"
-    #   run: task generate-schema && git add {staged_files}
+      run: task fix && git add {staged_files}
+    gofmt:
+      root: backend/
+      tags: backend style
+      glob: "*.go"
+      run: task fmt && git add {staged_files}
+    schema:
+      root: backend/
+      tags: generate ER
+      glob: "*.sql"
+      run: task generate-schema && git add {staged_files}
     eslint:
       root: frontend/
       tags: frontend lint & style

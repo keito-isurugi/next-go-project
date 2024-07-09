@@ -3,12 +3,13 @@ package server
 import (
 	"net/http"
 
-	"github.com/keito-isurugi/next-go-project/internal/presentation/todos"
-	"github.com/keito-isurugi/next-go-project/internal/infra/db"
-	"github.com/keito-isurugi/next-go-project/internal/infra/env"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
+
+	"github.com/keito-isurugi/next-go-project/internal/infra/db"
+	"github.com/keito-isurugi/next-go-project/internal/infra/env"
+	"github.com/keito-isurugi/next-go-project/internal/presentation/todos"
 )
 
 func SetupRouter(ev *env.Values, dbClient db.Client, zapLogger *zap.Logger) *echo.Echo {
@@ -18,7 +19,7 @@ func SetupRouter(ev *env.Values, dbClient db.Client, zapLogger *zap.Logger) *ech
 		AllowHeaders: []string{"*"},
 	}))
 
-	e.GET("/health", func (c echo.Context) error {
+	e.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
 	})
 

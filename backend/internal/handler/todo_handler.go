@@ -5,8 +5,9 @@ import (
 
 	// "github.com/keito-isurugi/next-go-project/internal/domain/entity"
 	// "github.com/keito-isurugi/next-go-project/internal/infra/db"
-	"github.com/keito-isurugi/next-go-project/internal/infra/postgres"
 	"github.com/labstack/echo/v4"
+
+	"github.com/keito-isurugi/next-go-project/internal/infra/postgres"
 )
 
 type TodoHandler interface {
@@ -17,7 +18,7 @@ type todoHnadler struct {
 	todoRepo postgres.TodoPostgres
 }
 
-func NewTodoHandler(todoRepo postgres.TodoPostgres) *todoHnadler{
+func NewTodoHandler(todoRepo postgres.TodoPostgres) *todoHnadler {
 	return &todoHnadler{
 		todoRepo: todoRepo,
 	}
