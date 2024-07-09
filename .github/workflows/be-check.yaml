@@ -85,15 +85,10 @@ jobs:
         run: go mod download
         working-directory: backend
 
-      - name: Run golangci-lint
-        run: |
-          golangci-lint run --config=backend/.golangci.yaml
-        working-directory: backend
-        
-      # - uses: golangci/golangci-lint-action@v6
-      #   with:
-      #     version: v1.59 # asdfのバージョンと合わせる
-      #     args: --config=backend/.golangci.yaml
+      - uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.59 # asdfのバージョンと合わせる
+          args: --config=backend/.golangci.yaml
 
       - name: Test
         env:
