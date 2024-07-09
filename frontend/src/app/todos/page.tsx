@@ -1,43 +1,42 @@
-"use client"
+"use client";
 
-import Link from 'next/link'
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export default function Todos() {
-  const [todos, setTodos] = useState([])
-  const [input, setInput] = useState('');
+  const [todos, setTodos] = useState([]);
+  const [input, setInput] = useState("");
   const [editingId, setEditingId] = useState(null);
-  const [editInput, setEditInput] = useState('');
+  const [editInput, setEditInput] = useState("");
 
   useEffect(() => {
-    getTodos()
-  }, [])
+    getTodos();
+  }, []);
 
   const getTodos = async () => {
-    const res = await fetch('http://localhost:8080/todos')
-    const result = await res.json()
-    setTodos(result)
-  }
+    const res = await fetch("http://localhost:8080/todos");
+    const result = await res.json();
+    setTodos(result);
+  };
 
-  const addTodo = async (e: { preventDefault: () => void; }) => {
+  const addTodo = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (input) {
       try {
-        const res = await fetch('http://localhost:8080/todos', {
-          method: 'POST',
+        const res = await fetch("http://localhost:8080/todos", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ title: input }),
         });
         if (res.ok) {
           getTodos(); // 新しいTodoを追加した後、最新のTodoリストを取得
-          setInput('');
+          setInput("");
         } else {
-          console.error('Failed to add todo');
+          console.error("Failed to add todo");
         }
       } catch (error) {
-        console.error('Error adding todo:', error);
+        console.error("Error adding todo:", error);
       }
     }
   };
@@ -45,15 +44,15 @@ export default function Todos() {
   const deleteTodo = async (id: string) => {
     try {
       const res = await fetch(`http://localhost:8080/todos/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
       if (res.ok) {
         getTodos(); // 削除後、最新のTodoリストを取得
       } else {
-        console.error('Failed to delete todo');
+        console.error("Failed to delete todo");
       }
     } catch (error) {
-      console.error('Error deleting todo:', error);
+      console.error("Error deleting todo:", error);
     }
   };
 
@@ -64,61 +63,61 @@ export default function Todos() {
 
   const cancelEditing = () => {
     setEditingId(null);
-    setEditInput('');
+    setEditInput("");
   };
 
   const updateTodo = async (id: string) => {
     try {
       const res = await fetch(`http://localhost:8080/todos/${id}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ title: editInput, done_flag: false }),
       });
       if (res.ok) {
         getTodos();
         setEditingId(null);
-        setEditInput('');
+        setEditInput("");
       } else {
-        console.error('Failed to update todo');
+        console.error("Failed to update todo");
       }
     } catch (error) {
-      console.error('Error updating todo:', error);
+      console.error("Error updating todo:", error);
     }
   };
 
   const toggleTodo = async (id: string, title: string) => {
     try {
-        const res = await fetch(`http://localhost:8080/todos/${id}`, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ title: title, doneFlag: true }),
-          });
+      const res = await fetch(`http://localhost:8080/todos/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title: title, doneFlag: true }),
+      });
       if (res.ok) {
         getTodos(); // 完了状態を変更後、最新のTodoリストを取得
       } else {
-        console.error('Failed to toggle todo completion');
+        console.error("Failed to toggle todo completion");
       }
     } catch (error) {
-      console.error('Error toggling todo completion:', error);
+      console.error("Error toggling todo completion:", error);
     }
   };
 
   return (
     <>
-        <div className="relative py-3 sm:max-w-xl sm:mx-auto">
+      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
         <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
           <div className="max-w-md mx-auto">
             <div className="divide-y divide-gray-200">
               <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
-                <h1 className="text-3xl font-extrabold text-center">Todo App</h1>
-                <form 
-                    onSubmit={addTodo} 
-                    className="mt-8 space-y-6">
+                <h1 className="text-3xl font-extrabold text-center">
+                  Todo App
+                </h1>
+                <form onSubmit={addTodo} className="mt-8 space-y-6">
                   <input
                     type="text"
                     value={input}
@@ -135,7 +134,10 @@ export default function Todos() {
                 </form>
                 <ul className="mt-8 space-y-4">
                   {todos.map((todo: any) => (
-                    <li key={todo.id} className="flex items-center justify-between space-x-3">
+                    <li
+                      key={todo.id}
+                      className="flex items-center justify-between space-x-3"
+                    >
                       {editingId === todo.id ? (
                         <div className="flex-1 flex items-center space-x-2">
                           <input
@@ -162,7 +164,7 @@ export default function Todos() {
                           <div
                             onClick={() => toggleTodo(todo.id, todo.title)}
                             className={`flex items-center space-x-3 cursor-pointer ${
-                              todo.doneFlag ? 'line-through text-gray-400' : ''
+                              todo.doneFlag ? "line-through text-gray-400" : ""
                             }`}
                           >
                             <input
@@ -198,5 +200,5 @@ export default function Todos() {
         </div>
       </div>
     </>
-  )
+  );
 }
