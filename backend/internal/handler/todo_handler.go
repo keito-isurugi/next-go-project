@@ -18,7 +18,7 @@ type todoHnadler struct {
 	todoRepo postgres.TodoPostgres
 }
 
-func NewTodoHandler(todoRepo postgres.TodoPostgres) *todoHnadler {
+func NewTodoHandler(todoRepo postgres.TodoPostgres) TodoHandler {
 	return &todoHnadler{
 		todoRepo: todoRepo,
 	}

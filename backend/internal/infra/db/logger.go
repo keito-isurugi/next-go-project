@@ -42,7 +42,7 @@ func initGormLogger(zapLogger *zap.Logger) *GormLogger {
 // 	return l.Logger
 // }
 
-func (l *GormLogger) LogMode(level logger.LogLevel) logger.Interface {
+func (l *GormLogger) LogMode(_ logger.LogLevel) logger.Interface {
 	return l
 }
 

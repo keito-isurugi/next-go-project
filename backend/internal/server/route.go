@@ -12,7 +12,7 @@ import (
 	"github.com/keito-isurugi/next-go-project/internal/presentation/todos"
 )
 
-func SetupRouter(ev *env.Values, dbClient db.Client, zapLogger *zap.Logger) *echo.Echo {
+func SetupRouter(_ *env.Values, dbClient db.Client, _ *zap.Logger) *echo.Echo {
 	e := echo.New()
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins: []string{"*"},

@@ -15,7 +15,7 @@ type todoPostgres struct {
 	dbClient db.Client
 }
 
-func NewTodoPostgres(dbClient db.Client) *todoPostgres {
+func NewTodoPostgres(dbClient db.Client) TodoPostgres {
 	return &todoPostgres{
 		dbClient: dbClient,
 	}
