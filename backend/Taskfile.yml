@@ -59,8 +59,8 @@ tasks:
   fmt:
     desc: Format go files
     cmds:
-      - find . \( -type d -path './internal/domain/repository/mock' \) -prune -o -name '*.go' -print | xargs goimports -l -w -local "github.com/keito-isurugi/next-go-project"
-      - find . \( -type d -path './internal/domain/repository/mock' \) -prune -o -name '*.go' -print | xargs gofmt -l -w
+      - find . \( -type d -path './internal/domain/todo/mock' \) -prune -o -name '*.go' -print | xargs goimports -l -w -local "github.com/keito-isurugi/next-go-project"
+      - find . \( -type d -path './internal/domain/todo/mock' \) -prune -o -name '*.go' -print | xargs gofmt -l -w
 
   mockgen:
     desc: Generate mock

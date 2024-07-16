@@ -9,7 +9,9 @@ import (
 
 	"github.com/keito-isurugi/next-go-project/internal/infra/db"
 	"github.com/keito-isurugi/next-go-project/internal/infra/env"
-	"github.com/keito-isurugi/next-go-project/internal/presentation/todos"
+	"github.com/keito-isurugi/next-go-project/internal/infra/repository"
+	presentationTodo "github.com/keito-isurugi/next-go-project/internal/presentation/todo"
+	useCaseTodo "github.com/keito-isurugi/next-go-project/internal/usecase/todo"
 )
 
 func SetupRouter(_ *env.Values, dbClient db.Client, _ *zap.Logger) *echo.Echo {
@@ -24,7 +26,12 @@ func SetupRouter(_ *env.Values, dbClient db.Client, _ *zap.Logger) *echo.Echo {
 	})
 
 	// handler
-	todoHandler := todos.NewTodoHandler(dbClient)
+	todoHandler := presentationTodo.NewTodoHandler(
+		dbClient,
+		useCaseTodo.NewListTodoUseCase(
+			repository.NewTodoRepository(dbClient),
+		),
+	)
 
 	todoGroup := e.Group("/todos")
 	todoGroup.GET("", todoHandler.ListTodos)

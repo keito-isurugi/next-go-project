@@ -12,4 +12,4 @@ type Todo struct {
 	DeletedAt *time.Time
 }
 
-type ListTodo []Todo
+type ListTodos []Todo

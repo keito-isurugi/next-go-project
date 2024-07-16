@@ -1,4 +1,4 @@
-package todos
+package handler
 
 import (
 	"net/http"
@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/keito-isurugi/next-go-project/internal/infra/db"
+	useCaseTodo "github.com/keito-isurugi/next-go-project/internal/usecase/todo"
 )
 
 type Todo struct {
@@ -48,27 +49,24 @@ type TodoHandler interface {
 	DeleteTodo(c echo.Context) error
 }
 
-type todoResponse struct {
-	ID       int    `json:"id" example:"1"`
-	Title    string `json:"title" example:"テストタイトル"`
-	DoneFlag bool   `json:"doneFlag" example:"false"`
-}
-
-type listTodosResponse []todoResponse
-
 type todoHnadler struct {
-	dbClient db.Client
+	dbClient         db.Client
+	listTodosUseCase useCaseTodo.ListTodosUseCase
 }
 
-func NewTodoHandler(dc db.Client) TodoHandler {
+func NewTodoHandler(
+	dbClient db.Client,
+	listTodosUseCase useCaseTodo.ListTodosUseCase,
+) TodoHandler {
 	return &todoHnadler{
-		dbClient: dc,
+		dbClient:         dbClient,
+		listTodosUseCase: listTodosUseCase,
 	}
 }
 
 func (th *todoHnadler) ListTodos(c echo.Context) error {
-	var lt ListTodos
-	if err := th.dbClient.Conn(c.Request().Context()).Where("done_flag", false).Order("id").Find(&lt).Error; err != nil {
+	lt, err := th.listTodosUseCase.Exec(c)
+	if err != nil {
 		return err
 	}
 
@@ -101,10 +99,6 @@ func (th *todoHnadler) GetTodo(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-type registerTodoRequest struct {
-	Title string `json:"title" example:"サンプルタイトル" ja:"タイトル" validate:"required,max=255"`
-}
-
 func (th *todoHnadler) RegisterTodo(c echo.Context) error {
 	var req registerTodoRequest
 	if err := c.Bind(&req); err != nil {
@@ -124,11 +118,6 @@ func (th *todoHnadler) RegisterTodo(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, reqTodo.ID)
-}
-
-type updateTodoRequest struct {
-	Title    string `json:"title" example:"サンプルタイトル" ja:"タイトル" validate:"required,max=255"`
-	DoneFlag bool   `json:"doneFlag" example:"true" ja:"完了フラグ" validate:"required"`
 }
 
 func (th *todoHnadler) UpdateTodo(c echo.Context) error {
