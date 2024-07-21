@@ -12,4 +12,5 @@ type ObjectInput struct {
 
 type StorageRepository interface {
 	PutObject(file *multipart.FileHeader, bucketName, objectKey string) (string, error)
+	DeleteObject(attachmentFile string) error
 }

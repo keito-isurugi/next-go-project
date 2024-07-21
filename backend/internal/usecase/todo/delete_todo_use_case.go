@@ -3,6 +3,7 @@ package todo
 import (
 	"github.com/labstack/echo/v4"
 
+	storageDomain "github.com/keito-isurugi/next-go-project/internal/domain/storage"
 	domain "github.com/keito-isurugi/next-go-project/internal/domain/todo"
 )
 
@@ -11,17 +12,32 @@ type DeleteTodoUseCase interface {
 }
 
 type deleteTodoUseCase struct {
-	todoRepo domain.TodoRepository
+	todoRepo    domain.TodoRepository
+	storageRepo storageDomain.StorageRepository
 }
 
-func NewDeleteTodoUseCase(todoRepo domain.TodoRepository) DeleteTodoUseCase {
+func NewDeleteTodoUseCase(
+	todoRepo domain.TodoRepository,
+	storageRepo storageDomain.StorageRepository,
+) DeleteTodoUseCase {
 	return &deleteTodoUseCase{
-		todoRepo: todoRepo,
+		todoRepo:    todoRepo,
+		storageRepo: storageRepo,
 	}
 }
 
 func (dtuc *deleteTodoUseCase) Exec(c echo.Context, id int) error {
-	err := dtuc.todoRepo.DeleteTodo(c.Request().Context(), id)
+	todo, err := dtuc.todoRepo.GetTodo(c.Request().Context(), id)
+	if err != nil {
+		return err
+	}
+
+	err = dtuc.storageRepo.DeleteObject(todo.AttachmentFile)
+	if err != nil {
+		return err
+	}
+
+	err = dtuc.todoRepo.DeleteTodo(c.Request().Context(), id)
 	if err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -66,7 +67,23 @@ func (s3r *s3Repository) PutObject(file *multipart.FileHeader, bucketName, objec
 	}
 
 	// アップロードされたオブジェクトのURLを生成
-	url := fmt.Sprintf("http://localhost:4566/%s/%s", bucketName, objectKey)
+	url := fmt.Sprintf("%s/%s/%s", s3r.ev.AwsEndpoint, bucketName, objectKey)
 
 	return url, nil
+}
+
+func (s3r *s3Repository) DeleteObject(attachmentFile string) error {
+	key := strings.Split(attachmentFile, s3r.ev.AwsS3BucketName+"/")
+
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String(s3r.ev.AwsS3BucketName),
+		Key:    aws.String(key[1]),
+	}
+
+	_, err := s3r.S3Client.DeleteObject(input)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

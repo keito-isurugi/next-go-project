@@ -46,6 +46,10 @@ func SetupRouter(ev *env.Values, dbClient db.Client, _ *zap.Logger, awsClient s3
 		),
 		useCaseTodo.NewDeleteTodoUseCase(
 			repository.NewTodoRepository(dbClient),
+			repository.NewS3Repository(
+				ev,
+				awsClient,
+			),
 		),
 	)
 
