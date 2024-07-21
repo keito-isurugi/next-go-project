@@ -6,17 +6,17 @@ VALUES ('山田太郎', 'yamada@example.com', 'pass'),
        ('佐藤佳子', 'satou@example.com', 'pass');
 
 TRUNCATE TABLE todos RESTART IDENTITY CASCADE;
-INSERT INTO todos (user_id, title, done_flag)
-VALUES (1, 'テストToDo1', 'false'),
-       (1, 'テストToDo2', 'false'),
-       (1, 'テストToDo3', 'false'),
-       (1, 'テストToDo4', 'false'),
-       (2, 'テストToDo5', 'false'),
-       (2, 'テストToDo6', 'false'),
-       (2, 'テストToDo7', 'false'),
-       (3, 'テストToDo8', 'false'),
-       (3, 'テストToDo9', 'false'),
-       (3, 'テストToDo10', 'false');
+INSERT INTO todos (user_id, title, attachment_file, done_flag)
+VALUES (1, 'テストToDo1', 'attachment_file/path', 'false'),
+       (1, 'テストToDo2', 'attachment_file/path', 'false'),
+       (1, 'テストToDo3', 'attachment_file/path', 'false'),
+       (1, 'テストToDo4', 'attachment_file/path', 'false'),
+       (2, 'テストToDo5', 'attachment_file/path', 'false'),
+       (2, 'テストToDo6', 'attachment_file/path', 'false'),
+       (2, 'テストToDo7', 'attachment_file/path', 'false'),
+       (3, 'テストToDo8', 'attachment_file/path', 'false'),
+       (3, 'テストToDo9', 'attachment_file/path', 'false'),
+       (3, 'テストToDo10', 'attachment_file/path', 'false');
 
 TRUNCATE TABLE categories RESTART IDENTITY CASCADE;
 INSERT INTO categories (name)
