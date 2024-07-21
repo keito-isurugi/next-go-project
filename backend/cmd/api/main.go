@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/keito-isurugi/next-go-project/internal/infra/aws"
 	"github.com/keito-isurugi/next-go-project/internal/infra/db"
 	"github.com/keito-isurugi/next-go-project/internal/infra/env"
 	"github.com/keito-isurugi/next-go-project/internal/infra/logger"
@@ -26,18 +27,12 @@ func main() {
 		zapLogger.Error(err.Error())
 	}
 
-	// awsClient, err := aws.NewAWSSession(ev)
-	// if err != nil {
-	// 	zapLogger.Error(err.Error())
-	// }
+	awsClient, err := aws.NewS3Client(ev)
+	if err != nil {
+		zapLogger.Error(err.Error())
+	}
 
-	router := server.SetupRouter(ev, dbClient, zapLogger)
+	router := server.SetupRouter(ev, dbClient, zapLogger, awsClient)
 
 	router.Logger.Fatal(router.Start(":" + ev.BeServerPort))
-
-	// e := echo.New()
-	// e.GET("/", func(c echo.Context) error {
-	// 	return c.String(http.StatusOK, "Hello, World!!!!!!!")
-	// })
-	// e.Logger.Fatal(e.Start(":8080"))
 }

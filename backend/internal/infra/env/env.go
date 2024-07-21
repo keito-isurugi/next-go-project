@@ -12,6 +12,7 @@ type Values struct {
 	Server
 	DB
 	TestDB
+	AWS
 	Debug bool `default:"true" split_words:"true"`
 }
 
@@ -34,6 +35,15 @@ type TestDB struct {
 	TestPostgresUser     string `required:"true" split_words:"true"`
 	TestPostgresPassword string `required:"true" split_words:"true"`
 	TestPostgresDatabase string `required:"true" split_words:"true"`
+}
+
+type AWS struct {
+	AwsRegion          string `required:"true" split_words:"true"`
+	AwsAccessKeyID     string `split_words:"true"`
+	AwsSecretAccessKey string `split_words:"true"`
+	AwsEndpoint        string `split_words:"true"`
+	AwsEndpointLocal   string `split_words:"true"`
+	AwsS3BucketName    string `required:"true" split_words:"true"`
 }
 
 func NewValue() (*Values, error) {
