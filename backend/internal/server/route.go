@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
@@ -14,7 +15,7 @@ import (
 	useCaseTodo "github.com/keito-isurugi/next-go-project/internal/usecase/todo"
 )
 
-func SetupRouter(_ *env.Values, dbClient db.Client, _ *zap.Logger) *echo.Echo {
+func SetupRouter(ev *env.Values, dbClient db.Client, _ *zap.Logger, awsClient s3iface.S3API) *echo.Echo {
 	e := echo.New()
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins: []string{"*"},
@@ -27,8 +28,23 @@ func SetupRouter(_ *env.Values, dbClient db.Client, _ *zap.Logger) *echo.Echo {
 
 	// handler
 	todoHandler := presentationTodo.NewTodoHandler(
-		dbClient,
+		repository.NewS3Repository(
+			ev,
+			awsClient,
+		),
 		useCaseTodo.NewListTodoUseCase(
+			repository.NewTodoRepository(dbClient),
+		),
+		useCaseTodo.NewGetTodoUseCase(
+			repository.NewTodoRepository(dbClient),
+		),
+		useCaseTodo.NewRegisterTodoUseCase(
+			repository.NewTodoRepository(dbClient),
+		),
+		useCaseTodo.NewUpdateTodoUseCase(
+			repository.NewTodoRepository(dbClient),
+		),
+		useCaseTodo.NewDeleteTodoUseCase(
 			repository.NewTodoRepository(dbClient),
 		),
 	)
