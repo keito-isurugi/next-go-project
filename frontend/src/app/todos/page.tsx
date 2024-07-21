@@ -1,16 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function Todos() {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editInput, setEditInput] = useState("");
+  const [file, setFile] = useState<any>(null);
+  const fileInputRef = useRef<any>(null);
 
   useEffect(() => {
     getTodos();
   }, []);
+
+  const handleFileChange = (e: any) => {
+    setFile(e.target.files[0]);
+  };
+
+  const removeFile = () => {
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const getTodos = async () => {
     const res = await fetch("http://localhost:8080/todos");
@@ -21,13 +34,15 @@ export default function Todos() {
   const addTodo = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (input) {
+      console.log("file", file);
+      const formData = new FormData();
+      formData.append("title", input);
+      formData.append("attachmentFile", file);
+
       try {
         const res = await fetch("http://localhost:8080/todos", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ title: input }),
+          body: formData,
         });
         if (res.ok) {
           getTodos(); // 新しいTodoを追加した後、最新のTodoリストを取得
@@ -66,14 +81,19 @@ export default function Todos() {
     setEditInput("");
   };
 
-  const updateTodo = async (id: string) => {
+  const updateTodo = async (todo: any) => {
     try {
-      const res = await fetch(`http://localhost:8080/todos/${id}`, {
+      const res = await fetch(`http://localhost:8080/todos/${todo.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ title: editInput, done_flag: false }),
+        body: JSON.stringify({
+          userID: todo.userID,
+          title: editInput,
+          doneFlag: false,
+          attachmentFile: todo.attachmentFile,
+        }),
       });
       if (res.ok) {
         getTodos();
@@ -125,6 +145,23 @@ export default function Todos() {
                     className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none"
                     placeholder="Add new todo..."
                   />
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="file"
+                      onChange={handleFileChange}
+                      ref={fileInputRef}
+                      className="flex-1"
+                    />
+                    {true && (
+                      <button
+                        type="button"
+                        onClick={removeFile}
+                        className="px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      >
+                        Remove File
+                      </button>
+                    )}
+                  </div>
                   <button
                     type="submit"
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -136,28 +173,46 @@ export default function Todos() {
                   {todos.map((todo: any) => (
                     <li
                       key={todo.id}
-                      className="flex items-center justify-between space-x-3"
+                      className="border rounded-lg p-4 space-y-2"
                     >
                       {editingId === todo.id ? (
-                        <div className="flex-1 flex items-center space-x-2">
+                        <div className="space-y-2">
                           <input
                             type="text"
                             value={editInput}
                             onChange={(e) => setEditInput(e.target.value)}
-                            className="flex-1 px-3 py-2 text-gray-700 border rounded-lg focus:outline-none"
+                            className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none"
                           />
-                          <button
-                            onClick={() => updateTodo(todo.id)}
-                            className="px-2 py-1 text-xs font-medium text-green-600 bg-green-100 rounded-md hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={cancelEditing}
-                            className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                          >
-                            Cancel
-                          </button>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="file"
+                              // onChange={handleEditFileChange}
+                              className="flex-1"
+                            />
+                            {todo.attachmentFile && (
+                              <button
+                                type="button"
+                                // onClick={removeEditFile}
+                                className="px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                              >
+                                Remove New File
+                              </button>
+                            )}
+                          </div>
+                          <div className="flex justify-end space-x-2">
+                            <button
+                              onClick={() => updateTodo(todo)}
+                              className="px-2 py-1 text-xs font-medium text-green-600 bg-green-100 rounded-md hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <>
@@ -175,7 +230,25 @@ export default function Todos() {
                             />
                             <span>{todo.title}</span>
                           </div>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex flex-wrap items-center space-x-2 mt-2">
+                            {todo.attachmentFile && (
+                              <>
+                                <a
+                                  href={todo?.attachmentFile}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 underline"
+                                >
+                                  Attachment
+                                </a>
+                                <button
+                                  // onClick={() => deleteFile(todo.id)}
+                                  className="px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                >
+                                  Delete File
+                                </button>
+                              </>
+                            )}
                             <button
                               onClick={() => startEditing(todo)}
                               className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

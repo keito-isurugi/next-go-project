@@ -4,7 +4,7 @@
 
 | 名前 | カラム一覧 | コメント | タイプ |
 | ---- | ------- | ------- | ---- |
-| [public.todos](public.todos.md) | 7 | Todosテーブル | BASE TABLE |
+| [public.todos](public.todos.md) | 8 | Todosテーブル | BASE TABLE |
 | [public.users](public.users.md) | 7 | ユーザーテーブル | BASE TABLE |
 | [public.categories](public.categories.md) | 5 | カテゴリテーブル | BASE TABLE |
 | [public.todo_categories](public.todo_categories.md) | 6 | Todo, カテゴリ中間テーブル | BASE TABLE |
@@ -23,6 +23,7 @@ erDiagram
   timestamp_without_time_zone created_at
   timestamp_without_time_zone updated_at
   timestamp_without_time_zone deleted_at
+  text attachment_file
 }
 "public.users" {
   integer id

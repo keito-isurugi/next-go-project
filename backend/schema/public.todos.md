@@ -15,6 +15,7 @@ Todosテーブル
 | created_at | timestamp without time zone | CURRENT_TIMESTAMP | false |  |  | 登録日時 |
 | updated_at | timestamp without time zone | CURRENT_TIMESTAMP | false |  |  | 削除日時 |
 | deleted_at | timestamp without time zone |  | true |  |  |  |
+| attachment_file | text |  | true |  |  | 添付ファイル |
 
 ## 制約一覧
 
@@ -42,6 +43,7 @@ erDiagram
   timestamp_without_time_zone created_at
   timestamp_without_time_zone updated_at
   timestamp_without_time_zone deleted_at
+  text attachment_file
 }
 ```
 
