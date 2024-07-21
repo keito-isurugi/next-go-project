@@ -1,45 +1,21 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/keito-isurugi/next-go-project/internal/infra/db"
+	"github.com/keito-isurugi/next-go-project/internal/domain/entity"
+	domain "github.com/keito-isurugi/next-go-project/internal/domain/storage"
 	useCaseTodo "github.com/keito-isurugi/next-go-project/internal/usecase/todo"
 )
 
-type Todo struct {
-	ID        int
-	UserID    int
-	Title     string
-	DoneFlag  bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
-}
-
-type ListTodos []Todo
-
-func NewTodo(
-	id int,
-	userID int,
-	title string,
-	doneFlag bool,
-	createdAt time.Time,
-	updatedAt time.Time,
-) *Todo {
-	return &Todo{
-		ID:        id,
-		UserID:    userID,
-		Title:     title,
-		DoneFlag:  doneFlag,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
-	}
-}
+const (
+	S3ObjectKey = "todo-images"
+)
 
 type TodoHandler interface {
 	ListTodos(c echo.Context) error
@@ -50,17 +26,29 @@ type TodoHandler interface {
 }
 
 type todoHnadler struct {
-	dbClient         db.Client
-	listTodosUseCase useCaseTodo.ListTodosUseCase
+	storageRepo         domain.StorageRepository
+	listTodosUseCase    useCaseTodo.ListTodosUseCase
+	getTodoUseCase      useCaseTodo.GetTodoUseCase
+	registerTodoUseCase useCaseTodo.RegisterTodoUseCase
+	updateTodoUseCase   useCaseTodo.UpdateTodoUseCase
+	deleteTodoUseCase   useCaseTodo.DeleteTodoUseCase
 }
 
 func NewTodoHandler(
-	dbClient db.Client,
+	storageRepo domain.StorageRepository,
 	listTodosUseCase useCaseTodo.ListTodosUseCase,
+	getTodoUseCase useCaseTodo.GetTodoUseCase,
+	registerTodoUseCase useCaseTodo.RegisterTodoUseCase,
+	updateTodoUseCase useCaseTodo.UpdateTodoUseCase,
+	deleteTodoUseCase useCaseTodo.DeleteTodoUseCase,
 ) TodoHandler {
 	return &todoHnadler{
-		dbClient:         dbClient,
-		listTodosUseCase: listTodosUseCase,
+		storageRepo:         storageRepo,
+		listTodosUseCase:    listTodosUseCase,
+		getTodoUseCase:      getTodoUseCase,
+		registerTodoUseCase: registerTodoUseCase,
+		updateTodoUseCase:   updateTodoUseCase,
+		deleteTodoUseCase:   deleteTodoUseCase,
 	}
 }
 
@@ -73,9 +61,10 @@ func (th *todoHnadler) ListTodos(c echo.Context) error {
 	res := make(listTodosResponse, len(lt))
 	for i := range lt {
 		res[i] = todoResponse{
-			ID:       lt[i].ID,
-			Title:    lt[i].Title,
-			DoneFlag: lt[i].DoneFlag,
+			ID:             lt[i].ID,
+			Title:          lt[i].Title,
+			AttachmentFile: lt[i].AttachmentFile,
+			DoneFlag:       lt[i].DoneFlag,
 		}
 	}
 
@@ -83,81 +72,114 @@ func (th *todoHnadler) ListTodos(c echo.Context) error {
 }
 
 func (th *todoHnadler) GetTodo(c echo.Context) error {
-	id := c.Param("id")
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return err
+	}
 
-	var t Todo
-	if err := th.dbClient.Conn(c.Request().Context()).Where("id", id).Find(&t).Error; err != nil {
+	t, err := th.getTodoUseCase.Exec(c, id)
+	if err != nil {
 		return err
 	}
 
 	res := todoResponse{
-		ID:       t.ID,
-		Title:    t.Title,
-		DoneFlag: t.DoneFlag,
+		ID:             t.ID,
+		Title:          t.Title,
+		AttachmentFile: t.AttachmentFile,
+		DoneFlag:       t.DoneFlag,
 	}
 
 	return c.JSON(http.StatusOK, res)
 }
 
 func (th *todoHnadler) RegisterTodo(c echo.Context) error {
+	// リクエストの内容をデバッグ出力
+	form, err := c.MultipartForm()
+	if err != nil {
+		fmt.Printf("Error parsing multipart form: %v\n", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid multipart form"})
+	}
+
+	var attachmentPath string
+	// ファイルを取得
+	files := form.File["attachmentFile"]
+	if len(files) > 0 {
+		file := files[0]
+		filename := fmt.Sprintf("%s/%d", S3ObjectKey, time.Now().UnixNano())
+
+		attachmentPath, err = th.storageRepo.PutObject(file, "next-go-images", filename)
+		if err != nil {
+			fmt.Printf("Error uploading to S3: %v\n", err)
+			return err
+		}
+
+		// 諸々デバッグ
+		fmt.Printf("File uploaded successfully. S3 URL: %s\n", attachmentPath)
+		fmt.Printf("Received file: %s\n", file.Filename)
+		fmt.Printf("File size: %d bytes\n", file.Size)
+		fmt.Println("3. Header: ")
+		for key, values := range file.Header {
+			for _, value := range values {
+				fmt.Printf("   %s: %s\n", key, value)
+			}
+		}
+		fmt.Printf("File saved to: %s\n", attachmentPath)
+	}
+
 	var req registerTodoRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
-	reqTodo := NewTodo(
+	reqTodo := entity.NewTodo(
 		0,
 		1,
 		req.Title,
+		attachmentPath,
 		false,
 		time.Now(),
 		time.Now(),
 	)
 
-	if err := th.dbClient.Conn(c.Request().Context()).Create(reqTodo).Error; err != nil {
+	id, err := th.registerTodoUseCase.Exec(c, reqTodo)
+	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, reqTodo.ID)
+
+	return c.JSON(http.StatusOK, id)
 }
 
 func (th *todoHnadler) UpdateTodo(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
-
 	var req updateTodoRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
-	var todo Todo
-	if err := th.dbClient.Conn(c.Request().Context()).Where("id", id).First(&todo).Error; err != nil {
-		return err
-	}
-
-	reqTodo := NewTodo(
-		todo.ID,
-		todo.UserID,
+	reqTodo := entity.NewTodo(
+		req.ID,
+		req.UserID,
 		req.Title,
+		req.AttachmentFile,
 		req.DoneFlag,
-		todo.CreatedAt,
+		time.Now(),
 		time.Now(),
 	)
 
-	if err := th.dbClient.Conn(c.Request().Context()).Updates(reqTodo).Error; err != nil {
+	err := th.updateTodoUseCase.Exec(c, reqTodo)
+	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func (th *todoHnadler) DeleteTodo(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	var todo Todo
-	if err := th.dbClient.Conn(c.Request().Context()).Where("id", id).First(&todo).Error; err != nil {
+	err := th.deleteTodoUseCase.Exec(c, id)
+	if err != nil {
 		return err
 	}
 
-	if err := th.dbClient.Conn(c.Request().Context()).Delete(&todo).Error; err != nil {
-		return err
-	}
 	return nil
 }
