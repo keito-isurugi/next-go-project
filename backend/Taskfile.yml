@@ -27,7 +27,7 @@ tasks:
   exec-dummy:
     desc: Insert dummy data for test DB
     cmds:
-      - docker cp DDL/insert_dummy_data.sql db:/ && docker exec -it db psql -U postgres -d next_go -f /insert_dummy_data.sqlPP
+      - docker cp ./DDL/insert_dummy_data.sql next-go-project-db:/ && docker exec -it next-go-project-db psql -U postgres -d next_go -f /insert_dummy_data.sql
 
   refresh-schema:
     desc: Refresh schema for test DB
